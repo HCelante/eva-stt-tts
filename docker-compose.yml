@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  eva:
+    image: amaralfelipe1522/eva-stt-tts:2.1
+    container_name: eva
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DISPLAY=${DISPLAY}
+      - PULSE_SERVER=${PULSE_SERVER}
+      - UID=${UID}
+    devices:
+      - /dev/snd
+    group_add:
+      - audio
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /run/user/${UID}/pulse/native:/run/user/${UID}/pulse/native
+    command: sh -c "python3 main.py 2>/dev/null"
+    tty: true
+    stdin_open: true
+    # remove: true

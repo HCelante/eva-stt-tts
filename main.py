@@ -1,26 +1,16 @@
-from controllers.input_listener import start_listening
-import threading
-import time
-from views.display import display_message
-
-def main():
-    print('EVA iniciada')
-    display_message('Olá eu sou a Eva')
-
-    # Cria e inicia a thread que escuta a tecla Espaço
-    thread_escuta_tecla = threading.Thread(target=start_listening)
-    thread_escuta_tecla.daemon = True  # Faz com que a thread seja encerrada quando o programa principal terminar
-    thread_escuta_tecla.start()
-
-    # Mantém o programa principal em execução
-    try:
-        while True:
-            time.sleep(1)  # Pequena pausa para reduzir o uso da CPU no loop principal
-    except KeyboardInterrupt:
-        print("Programa encerrado.")
+from interface.listeners.input_listener import InputListener
+from infrastructure.api.api_caller import APICaller
+from infrastructure.stt.stt_module import STTModule
+from infrastructure.tts.tts_module_free import TTSModuleFREE
+from domain.services.command_service import CommandService
+from application.use_cases.process_command import ProcessCommand
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"Ocorreu um erro: {e}")
+    api_caller = APICaller()
+    tts_module = TTSModuleFREE()
+    command_service = CommandService(api_caller, tts_module)
+    process_command_use_case = ProcessCommand(command_service)
+
+    stt_module = STTModule()
+    input_listener = InputListener(stt_module, process_command_use_case)
+    input_listener.start()
